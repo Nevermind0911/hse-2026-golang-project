@@ -21,3 +21,6 @@ program:
   minTimeSleep: 100
   maxTimeSleep: 30000
   port: 8001
+
+grpc:
+  connectorAddress: "connector:8001
