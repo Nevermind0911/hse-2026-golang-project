@@ -10,7 +10,7 @@ services:
       - master_data:/var/lib/postgresql/data
       - ./postgres/master/postgresql.conf:/etc/postgresql/postgresql.conf
       - ./postgres/master/pg_hba.conf:/etc/postgresql/pg_hba.conf
-      - ./migrations/master-init.sql:/docker-entrypoint-initdb.d/10-master.sql
+      - ./postgres/init/00-roles.sql:/docker-entrypoint-initdb.d/00-roles.sql
     command: postgres -c config_file=/etc/postgresql/postgresql.conf -c hba_file=/etc/postgresql/pg_hba.conf
     ports:
       - "5432:5432"
@@ -100,8 +100,6 @@ services:
         condition: service_healthy
       postgres-replica:
         condition: service_healthy
-      migrator:
-        condition: service_completed_successfully
     volumes:
       - ./configs:/app/configs
     ports:
