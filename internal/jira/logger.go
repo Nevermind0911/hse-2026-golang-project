@@ -2,7 +2,6 @@ package connector
 
 import (
 	"fmt"
-	"go/format"
 	"io"
 	"os"
 	"time"
