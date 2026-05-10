@@ -63,7 +63,7 @@ func (c *JiraClient) doRequest(ctx context.Context, url string, target interface
 			if wait > c.maxSleep {
 				return fmt.Errorf("network error after retries: %w", err)
 			}
-			c.log.WithField(logrus.Fields{
+			c.log.WithFields(logrus.Fields{
 				"url":     url,
 				"wait_ms": wait.Milliseconds(),
 				"error":   err.Error(),
@@ -81,7 +81,7 @@ func (c *JiraClient) doRequest(ctx context.Context, url string, target interface
 			if wait > c.maxSleep {
 				return fmt.Errorf("jira returned %d after all retries for %s", resp.StatusCode, url)
 			}
-			c.log.WithField(logrus.Fields{
+			c.log.WithFields(logrus.Fields{
 				"url":         url,
 				"wait_ms":     wait.Milliseconds(),
 				"status_code": resp.StatusCode,
@@ -124,7 +124,7 @@ func (c *JiraClient) FetchIssuesPage(
 	ctx context.Context,
 	projectKey string,
 	startAt, maxResults int,
-) (*SearchResponse, error) {
+) (*JiraIssues, error) {
 	url := fmt.Sprintf(
 		"%s/rest/api/2/search?jql=project=%s&startAt=%d&maxResults=%d&expand=changelog",
 		c.baseURL, projectKey, startAt, maxResults,
@@ -135,7 +135,7 @@ func (c *JiraClient) FetchIssuesPage(
 		"page_size": maxResults,
 	}).Info("fetching issues page from jira")
 
-	var result SearchResponse
+	var result JiraIssues
 	if err := c.doRequest(ctx, url, &result); err != nil {
 		return nil, fmt.Errorf("fetch issues page: %w", err)
 	}
