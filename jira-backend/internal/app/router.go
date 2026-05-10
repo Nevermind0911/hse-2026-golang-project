@@ -15,6 +15,7 @@ func NewRouter(
 
 	r.HandleFunc("/api/v1/projects", projectHandler.GetAll).Methods("GET")
 	r.HandleFunc("/api/v1/projects/{id:[0-9]+}", projectHandler.Delete).Methods("DELETE")
+	r.HandleFunc("/api/v1/projects/{project}/update", projectHandler.Update).Methods("POST")
 
 	r.HandleFunc("/api/v1/issues", issueHandler.GetByProject).Methods("GET")
 	r.HandleFunc("/api/v1/projects/{project}/issues", issueHandler.GetByProject).Methods("GET")

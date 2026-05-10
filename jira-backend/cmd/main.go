@@ -7,6 +7,11 @@ import (
 
 	_ "github.com/lib/pq"
 
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/credentials/insecure"
+
+	pb "hse-2026-golang-project/internal/proto/connector"
+
 	"hse-2026-golang-project/internal/db"
 	"hse-2026-golang-project/jira-backend/internal/app"
 	"hse-2026-golang-project/jira-backend/internal/handler"
@@ -35,7 +40,15 @@ func main() {
 
 	repo := repository.NewProjectRepository(storage)
 
-	projectService := service.NewProjectService(repo)
+	connectorAddress := "connector:8001" 
+	conn, err := grpc.NewClient(connectorAddress, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		log.Fatalf("create grpc connection: %v", err)
+	}
+	defer conn.Close()
+	grpcClient := pb.NewConnectorServiceClient(conn)
+
+	projectService := service.NewProjectService(repo, grpcClient)
 	issueService := service.NewIssueService(repo)
 	graphService := service.NewGraphService(repo)
 

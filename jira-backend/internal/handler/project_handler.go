@@ -50,3 +50,22 @@ func (h *ProjectHandler) Delete(w http.ResponseWriter, r *http.Request) {
 
 	w.WriteHeader(http.StatusNoContent)
 }
+
+func (h *ProjectHandler) Update(w http.ResponseWriter, r *http.Request) {
+	key := projectKeyFromRequest(r)
+	if key == "" {
+		writeError(w, http.StatusBadRequest, "[project key is required]")
+		return
+	}
+
+	if err := h.service.Update(r.Context(), key); err != nil {
+		writeError(w, http.StatusInternalServerError, "failed to update project")
+	}
+
+	if err := writeJSON(w, http.StatusOK, map[string]string {
+		"status": "ok",
+		"project": key,
+	}); err != nil {
+		http.Error(w, "failed to encode response", http.StatusInternalServerError)
+	}
+}
