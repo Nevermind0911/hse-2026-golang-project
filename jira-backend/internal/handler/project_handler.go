@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
 
 	"hse-2026-golang-project/internal/db"
 	"hse-2026-golang-project/jira-backend/internal/service"
@@ -13,10 +14,14 @@ import (
 
 type ProjectHandler struct {
 	service *service.ProjectService
+	log     *logrus.Logger
 }
 
-func NewProjectHandler(s *service.ProjectService) *ProjectHandler {
-	return &ProjectHandler{service: s}
+func NewProjectHandler(s *service.ProjectService, log *logrus.Logger) *ProjectHandler {
+	return &ProjectHandler{
+		service: s,
+		log: log,
+	}
 }
 
 func (h *ProjectHandler) GetAll(w http.ResponseWriter, r *http.Request) {
@@ -62,8 +67,8 @@ func (h *ProjectHandler) Update(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusInternalServerError, "failed to update project")
 	}
 
-	if err := writeJSON(w, http.StatusOK, map[string]string {
-		"status": "ok",
+	if err := writeJSON(w, http.StatusOK, map[string]string{
+		"status":  "ok",
 		"project": key,
 	}); err != nil {
 		http.Error(w, "failed to encode response", http.StatusInternalServerError)
