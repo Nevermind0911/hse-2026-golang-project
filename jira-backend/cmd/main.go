@@ -22,7 +22,7 @@ import (
 func main() {
 	logger := connector.NewLogger()
 
-	dsn := "postgres://pguser:pgpwd@localhost:5432/testdb?sslmode=disable"
+	dsn := "postgres://pguser:pgpwd@postgres-master:5432/testdb?sslmode=disable"
 
 	writeDB, err := sql.Open("postgres", dsn)
 	if err != nil {
