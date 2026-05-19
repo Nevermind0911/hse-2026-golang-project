@@ -23,6 +23,7 @@ Desktop.ini
 *.prof
 vendor/
 bin/
+.gocache/
 
 # Angular/Node
 web/node_modules/

@@ -28,6 +28,28 @@ func (s *Storage) GetProjectByJiraID(ctx context.Context, jiraID int64) (*models
 	return &projectFound, nil
 }
 
+func (s *Storage) GetProjectByKey(ctx context.Context, key string) (*models.Project, error) {
+	const query = `
+	SELECT jira_id, key, name, url
+	FROM project
+	WHERE key = $1;
+	`
+
+	var projectFound models.Project
+	err := s.readWithFallback(ctx, func(db *sql.DB) error {
+		return db.QueryRowContext(ctx, query, key).
+			Scan(&projectFound.JiraID, &projectFound.Key, &projectFound.Name, &projectFound.URL)
+	})
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, nil
+		}
+		return nil, fmt.Errorf("get project by key %q: %w", key, err)
+	}
+
+	return &projectFound, nil
+}
+
 func (s *Storage) GetAllProjects(ctx context.Context) ([]models.Project, error) {
 	const query = `
 	SELECT jira_id, key, name, url

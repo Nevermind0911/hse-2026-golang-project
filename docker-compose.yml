@@ -125,6 +125,22 @@ services:
       - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
     networks:
       - jira-network
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    depends_on:
+      postgres-master:
+        condition: service_healthy
+      connector:
+        condition: service_started
+    volumes:
+      - ./configs:/app/configs
+    ports:
+      - "8000:8000"
+    networks:
+      - jira-network
       
 volumes:
   master_data:

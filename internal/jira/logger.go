@@ -36,7 +36,7 @@ func (h *multiWriterHook) Fire(entry *logrus.Entry) error {
 
 	for _, w := range h.writers {
 		if _, err := w.Write(line); err != nil {
-			fmt.Fprint(os.Stderr, "log hook write error: %v\n", err)
+			fmt.Fprintf(os.Stderr, "log hook write error: %v\n", err)
 		}
 	}
 	return nil
