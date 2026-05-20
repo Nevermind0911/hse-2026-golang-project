@@ -3,10 +3,13 @@ package db
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"hse-2026-golang-project/internal/models"
 	"strings"
 )
+
+var ErrNotFound = errors.New("record not found")
 
 func (s *Storage) UpsertProject(ctx context.Context, p models.Project) (int64, error) {
 	const query = `
@@ -218,6 +221,46 @@ func (s *Storage) InsertStatusChangesBatch(
 
 		if _, err := tx.ExecContext(ctx, query, args...); err != nil {
 			return fmt.Errorf("batch insert status_changes: %w", err)
+		}
+
+		return nil
+	})
+}
+
+func (s *Storage) DeleteProject(ctx context.Context, projectID int64) error {
+	return s.writeTx(ctx, nil, func(tx *sql.Tx) error {
+		_, err := tx.ExecContext(ctx, `
+		DELETE FROM status_change
+		WHERE issue_id IN (
+			SELECT jira_id FROM issue WHERE project_id = $1
+		)`, projectID)
+
+		if err != nil {
+			return fmt.Errorf("delete status_change cascade: %w", err)
+		}
+
+		_, err = tx.ExecContext(ctx, `
+		DELETE FROM issue
+		WHERE project_id = $1`, projectID)
+
+		if err != nil {
+			return fmt.Errorf("delete issues cascade: %w", err)
+		}
+
+		result, err := tx.ExecContext(ctx, `
+		DELETE FROM project
+		WHERE jira_id = $1`, projectID)
+
+		if err != nil {
+			return fmt.Errorf("delete project: %w", err)
+		}
+
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			return fmt.Errorf("check rows affected: %w", err)
+		}
+		if rowsAffected == 0 {
+			return ErrNotFound
 		}
 
 		return nil

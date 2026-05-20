@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+option go_package = "hse-2026-golang-project/internal/proto/connector";
+package connector;
+
+service ConnectorService {
+  rpc GetProjects(GetProjectsRequest) returns (GetProjectsResponse);
+  rpc UpdateProject(UpdateProjectRequest) returns (UpdateProjectResponse);
+  rpc DeleteProject(DeleteProjectRequest) returns (DeleteProjectResponse);
+  rpc Health(HealthRequest) returns (HealthResponse);
+}
+
+message GetProjectsRequest {
+  int32  limit  = 1;
+  int32  page   = 2;
+  string search = 3; 
+}
+
+message GetProjectsResponse {
+  repeated ProjectDTO projects  = 1;
+  PageInfo            page_info = 2;
+}
+
+message ProjectDTO {
+  string key  = 1;
+  string name = 2;
+  string url  = 3;
+}
+
+message PageInfo {
+  int32 current_page   = 1;
+  int32 projects_count = 2;
+  int32 total_pages    = 3;
+}
+
+message UpdateProjectRequest {
+  string project_key = 1; 
+}
+
+message UpdateProjectResponse {
+  string status  = 1; 
+  string project = 2;
+}
+
+
+message DeleteProjectRequest {
+  int64 project_id = 1;
+}
+
+message DeleteProjectResponse {
+  string status = 1;
+}
+
+
+message HealthRequest {}
+
+message HealthResponse {
+  bool master_up           = 1;
+  bool replica_up          = 2;
+  bool master_in_recovery  = 3;
+  bool replica_in_recovery = 4;
+}
